@@ -1,0 +1,24 @@
+# OS and editor files
+.DS_Store
+._*
+*.asv
+*.m~
+~$*
+__pycache__/
+.ipynb_checkpoints/
+
+# Generated figures (run_all.m rebuilds them from the shipped tables)
+figs/
+
+# Primary data too large to distribute: the first-person frames (200 GB) and
+# the single frames of the condition without exploration (195 MB); see README, section 5
+data/imgs/
+data/static/
+
+# Per-frame intermediates of the feature extraction (200 MB; the per-trial
+# summaries in results/features/ are shipped)
+results/features/*_frames/
+
+# Local material that is not part of the published code
+doc/
+legacy/

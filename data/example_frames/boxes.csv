@@ -1,0 +1,17 @@
+env,geom,metal,trial,frame,left,top,side
+Check,Bumpy,0,141,2143.788.png,348,374,77
+Check,Bumpy,1,145,821.855.png,326,334,80
+Check,Smooth,0,146,434.980.png,342,322,75
+Check,Smooth,1,150,2049.465.png,381,190,101
+Gray,Bumpy,0,151,1019.276.png,364,277,83
+Gray,Bumpy,1,155,1953.847.png,386,237,83
+Gray,Smooth,0,156,1253.498.png,350,371,68
+Gray,Smooth,1,160,2307.218.png,376,264,92
+Sky,Bumpy,0,121,472.451.png,360,366,72
+Sky,Bumpy,1,125,1344.505.png,324,375,78
+Sky,Smooth,0,126,3716.530.png,298,358,80
+Sky,Smooth,1,130,1162.068.png,248,342,75
+Studio,Bumpy,0,131,382.727.png,334,334,80
+Studio,Bumpy,1,135,1352.087.png,337,361,77
+Studio,Smooth,0,136,350.280.png,350,358,68
+Studio,Smooth,1,140,507.280.png,344,348,69
