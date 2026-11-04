@@ -1,9 +1,9 @@
 """The thumbnail of the README (assets/thumbnail.png).
 
 Two observers explored the same object (trial 123: bumpy, physical metallicity
-0.5, Sky environment, head and hand) and answered differently: observer 1 held
-it up into the sun and said "glass", observer 16 looked at it against the sea
-and said "metal".  The top rows show frames of the two first-person videos; the
+0.5, Sky environment, head and hand) and answered differently: observer 16
+looked at it against the sea and said "metal", observer 1 held it up into the
+sun and said "glass".  The top rows show frames of the two first-person videos; the
 right-hand column shows what the model does with them: 116 statistics of each
 video, a logistic regression, and the predicted metallicity of each video on
 the model's curve.  The statistics and predicted metallicities are the real
@@ -28,7 +28,7 @@ from common import IMGS, RESULTS, MAIN_FEATURES, context_crop, frame_paths     #
 from evaluate import load_features_clean                                        # noqa: E402
 
 TRIAL = 123
-OBSERVERS = [("001", "glass"), ("016", "metal")]
+OBSERVERS = [("016", "metal"), ("001", "glass")]
 N_FRAMES = 6
 INK, GRAY = "#222222", "#777777"
 C_METAL, C_GLASS = "#1f3a6e", "#b9c9e3"          # the dark and light blue of the figures
@@ -93,7 +93,7 @@ for r, row in enumerate(rows):
 
 # the model: a logistic regression fitted to the other observers' videos, the two videos on its curve
 mx = left_x + N_FRAMES * (tile + gap) + 0.5 + 2.6 + 0.9
-axm = ax_in(mx + 0.45, top_y + 0.35, W - mx - 0.45 - 0.75, row_h * 2 - 1.3)
+axm = ax_in(mx + 0.45, top_y + 0.35, W - mx - 0.45 - 0.4, row_h * 2 - 1.3)
 ss = np.linspace(-6, 6, 300)
 axm.plot(ss, 1 / (1 + np.exp(-ss)), color=INK, lw=2)
 axm.axhline(0.5, color="#dddddd", lw=0.8, zorder=0)
@@ -101,10 +101,6 @@ for row in rows:
     s = row["s"]; p = 1 / (1 + np.exp(-s))
     c = C_METAL if row["resp"] == "metal" else C_GLASS
     axm.plot(s, p, "o", ms=15, mfc=c, mec=INK, mew=1.4, zorder=5)
-    if row["resp"] == "glass":
-        axm.annotate(f'observer {int(row["pid"])}: s = {s:+.1f}\nsaid "{row["resp"]}"', (s, p), xytext=(18, 40), textcoords="offset points", ha="right", va="bottom", fontsize=10, color=INK)
-    else:
-        axm.annotate(f'observer {int(row["pid"])}: s = {s:+.1f}\nsaid "{row["resp"]}"', (s, p), xytext=(-18, -38), textcoords="offset points", ha="left", va="top", fontsize=10, color=INK)
 axm.set_xlim(-6.2, 6.2); axm.set_ylim(-0.04, 1.04)
 axm.set_xticks([-6, -3, 0, 3, 6]); axm.set_yticks([0, 0.5, 1]); axm.tick_params(labelsize=9, colors=GRAY, length=2)
 for sp in ("top", "right"): axm.spines[sp].set_visible(False)
