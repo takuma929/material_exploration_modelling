@@ -46,6 +46,24 @@ def parse_trial_dir(name: str):
                 resp=int(m.group(5)), modality=modality(t))
 
 
+def window_mask(t_ms, window):
+    """Which frames (time stamps t_ms, sorted) belong to a time window: 'all', or 'pre<A>to<B>s',
+    the frames from B to A seconds before the response (e.g. pre2to4s), none when the video is
+    shorter than B."""
+    import numpy as np
+    t = np.asarray(t_ms, float); n = len(t)
+    m = re.match(r"^pre(\d+(?:\.\d+)?)to(\d+(?:\.\d+)?)s$", window)
+    if m:
+        a, b = float(m.group(1)) * 1000, float(m.group(2)) * 1000
+        back = t[-1] - t                                        # time before the response
+        if n == 0 or t[-1] - t[0] < b:                          # the video does not cover the window
+            return np.zeros(n, bool)
+        return (back >= a) & (back < b) if a > 0 else (back <= b)
+    if window != "all":
+        raise ValueError(window)
+    return np.ones(n, bool)
+
+
 def participants():
     """Participant IDs ('001' ...), from the frame folders when present, else from the trial table."""
     if IMGS.is_dir():

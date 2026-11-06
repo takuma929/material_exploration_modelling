@@ -1,9 +1,9 @@
-# Active exploration generates observer-specific image evidence for material identity
+# Active exploration generates observer-specific image cues for material identity
 
 <p align="center"><img src="assets/thumbnail.png" width="900" alt="Two observers explored the same object and answered differently; the statistics of each observer's own video, fed to a logistic regression, predict each observer's response"></p>
 
 Code and data of the manuscript *Active exploration generates observer-specific
-image evidence for material identity* (T. Morimoto, R. Nomachi and H. Tamura).
+image cues for material identity* (T. Morimoto, R. Nomachi and H. Tamura).
 In Experiment 3 of Nomachi, Tamura, Helgeland, Morimoto, Nakauchi and Minami
 (2026, *Journal of Vision*, 26(6):4, https://doi.org/10.1167/jov.26.6.4),
 19 observers judged whether a rendered object was made of metal or glass while
@@ -81,13 +81,13 @@ needs the frames (section 6).
 
 | Script | Figure | Content |
 | --- | --- | --- |
-| `fig1_stimuli.m` | 1 | What the observers saw and what the models were given: the first-person view in each environment with the model's patch outlined; the patches along physical metallicity for the two shapes; the patches of every environment |
+| `fig1_stimuli.m` | 1 | What the observers saw and what the models were given: the object along physical metallicity for the two shapes; the first-person view in each environment with the model's patch outlined; the patches of every environment |
 | `fig2_model.m` | 2 | How the own-video model is built and tested, on real data: one video becomes 116 statistics; the responses of all observers; the fitted logistic regression scores the left-out observer's videos; the 19 videos of one trial scored by the model of the disagreement test |
 | `fig3_behaviour.m` | 3 | The observers' responses: proportion of "metal" against physical metallicity by environment, shape and condition; viewing duration by condition |
-| `fig4_predictors.m` | 4 | AUC for each observer's responses of the statistics of the own video, of the same statistics reduced to 20 principal components and of physical metallicity, against the ceiling set by the other observers; the same by condition, including the condition without exploration |
+| `fig4_predictors.m` | 4 | AUC for each observer's responses of the statistics of the own video, of the same statistics reduced to 20 principal components and of physical metallicity, against the ceiling set by the other observers; the AUC against the number of principal components; the same predictors by condition, including the condition without exploration |
 | `fig5_statistics.m` | 5 | The 16 single statistics that predict the responses best: the eight whose higher values go with "metal" and the eight whose lower values do |
 | `fig6_statistics_observers.m` | 6 | The AUC of every statistic for every observer, by family, with the best statistic in each direction named |
-| `fig7_disagreement.m` | 7 | The disagreement test: two observers who saw the same trial and answered differently; the AUC over all disagreeing pairs, by environment and by shape, by the distance between the two videos, and by the part of the trial the statistics were computed from, each against its permutation null |
+| `fig7_disagreement.m` | 7 | The disagreement test: two observers who saw the same trial and answered differently; the AUC over all disagreeing pairs, by environment and by shape, by the distance between the two videos, and for the statistics of a 2-s window slid back from the response, each against its permutation null |
 | `figA1_statistics.m` | A1 | How each statistic is computed, illustrated on one frame, one frame pair and the time series of one trial |
 
 ### 5.2 Models and analyses (Python, `python/`)
@@ -101,12 +101,13 @@ Scripts that read only the shipped tables (`data/trials.csv`,
 | `behaviour_analysis.py` | Responses and viewing durations of the three exploration conditions; per-observer AUCs of the two reference predictors | `results/behaviour/trial_means.csv`, `observer_summary.csv`, `condition_means.csv` |
 | `evaluate.py <feature_set>` | One model: L2 logistic regression (C = 0.1) on the statistics z-scored within observer. Leave-one-observer-out AUC, overall and by condition; the disagreement test with its permutation null (300 shuffles), scored leave-one-stimulus-out; the swapped-video control; the reference predictors | `results/models/<feature_set>_C0.1.csv` (one row of summary values), `_scores.csv` (per video), `_observer_auc.csv` (per observer) |
 | `regularization_grid.py` | The main model over a grid of C | `results/models/regularization_grid.csv` |
-| `pca_sweep.py` | Leave-one-observer-out AUC with the statistics reduced to k principal components (Figure 4a) | `results/models/pca_sweep.csv`, `pca_sweep_by_observer.csv` |
+| `pca_sweep.py` | Leave-one-observer-out AUC with the statistics reduced to k principal components (Figure 4b) | `results/models/pca_sweep.csv`, `pca_sweep_by_observer.csv` |
 | `static_block.py` | The condition without exploration: the 23 per-frame quantities of the single image, the same evaluations, transfer to and from the exploration conditions, behaviour of all four conditions (Figures 3 and 4b) | `results/features/static/` (needs `data/static`; shipped), `results/models/static_block*.csv`, `results/behaviour/static_*.csv`, `block_means.csv` |
-| `within_trial_breakdown.py` | The disagreement test over all pairs, by environment and by shape, with the null of each and per observer (Figure 7b, d) | `results/models/within_trial_breakdown*.csv`, `within_trial_null_all.csv` |
+| `within_trial_breakdown.py` | The disagreement test over all pairs, by environment and by shape, with the null of each and per observer (Figure 7b) | `results/models/within_trial_breakdown*.csv`, `within_trial_null_all.csv` |
 | `within_trial_by_similarity.py` | The disagreement test by the distance between the two videos in the space of the statistics (Figure 7c) | `results/models/within_trial_by_similarity*.csv`, `within_trial_pairs.csv` |
 | `within_trial_by_difference.py` | The same by the difference in predicted metallicity and by physical metallicity, with a swapped-video control | `results/models/within_trial_by_difference*.csv`, `within_trial_by_level.csv` |
 | `within_trial_features.py` | Is it just viewing duration? The main model with duration partialled out and duration alone; single statistics and subsets of the statistics in the disagreement test | `results/models/duration_control*.csv`, `within_trial_features.csv`, `feature_ablations.csv` |
+| `sliding_window.py` | When the information that separates the observers arises: the disagreement test on the statistics of a 2-s window slid back from the response in steps of 1 s, with the videos that cover each window (Figure 7d) | `results/models/sliding_window.csv`, `sliding_window_by_observer.csv` |
 | `single_statistics.py` | The AUC of every statistic alone for each observer's responses, group and per observer, with a permutation null (Figures 5 and 6) | `results/models/single_statistics.csv`, `single_statistics_by_observer.csv` |
 | `observer_within_trial.py` | The disagreement test per observer for every model, and the paired tests between models across observers | `results/models/within_trial_by_observer.csv`, `within_trial_tests.csv` |
 | `collect_results.py` | The two tables the figures read | `results/summary/per_observer_auc.csv`, `model_summary.csv` |
@@ -122,6 +123,7 @@ Scripts that read the frames (`data/imgs`, `data/static`; not distributed):
 | `extract_image_stats.py --crop object [--window ...]` | The 15 object quantities per frame (object crop), summarized over the trial: the 63 object statistics | `results/features/image_stats_object[_<window>]/` |
 | `extract_relational_stats.py` | The 9 relational quantities per frame (the object against its surround on the patch), summarized over every window: the 37 relational statistics | `results/features/relational_frames/`, `relational[_<window>]/` |
 | `extract_flow_cues.py` | The optic-flow quantities of Doerschner et al. (2011) per frame pair, summarized over every window: the motion statistics | `results/features/flow_frames/`, `flow[_<window>]/` |
+| `extract_time_windows.py` | The three families for a 2-s window slid back from the response in steps of 1 s (from B to A seconds before it) | `results/features/<family>_pre<A>to<B>s/` |
 | `save_example_frames.py <what> ...` | The example frames of the figures | `data/example_frames/` |
 | `preprocessing/crop_transparent_objects.m` (MATLAB) | The object-only crops (`Cropped`) from the frames with the object alone (`Transparent`) | `data/imgs/participant_XXX/Cropped/` |
 
@@ -157,8 +159,7 @@ data/imgs/participant_XXX/Cropped/<folder>/<time_ms>.png       224 x 224 object-
 data/static/participant_XXX/{Color,Transparent,Cropped}/<folder>/<time_ms>.png   the one frame kept of each trial without exploration
 ```
 
-Screenshots were taken every fifth rendered frame (about 17 ms apart); the
-time stamps in ms are the file names. The patch given to the models is a square
+Screenshots are about 17 ms apart; the time stamps in ms are the file names. The patch given to the models is a square
 window centred on the object with a margin of a quarter of the object's size on
 each side, resized to 224 x 224 (`common.context_crop`): glass transmits and
 metal reflects the surroundings, so an object cut from its background carries no
@@ -192,7 +193,7 @@ frames minus the mean over the first half (`<quantity>_mean`, `_sd`, `_max`,
 | `image_stats_object/` | object | 15, over the object's own pixels: `area`, `Y_mean`, `Y_sd`, `Y_med`, `Y_max`, `Y_skew`, `Y_kurt`, `rms_contrast`, `hl_frac`, `hl_contrast`, `edge_energy`, `dark_frac`, `chroma_mean`, `chroma_sd`, `diff_energy` | 63 |
 | `relational/` | relational | 9, the surround and the object against it: `bg_Y_mean`, `bg_Y_sd`, `bg_Y_max`, `bg_rms_contrast`, `bg_chroma_mean`, `obj_bg_lum_ratio`, `obj_bg_contrast_ratio`, `obj_bg_max_ratio`, `obj_bg_chroma_ratio` | 37 |
 | `flow/` | motion | 6, from the optic flow between frames two captures apart: `coverage`, `coverage_change`, `div_mean_abs`, `flow_speed`, and `div_frac`, `sfm_inlier_ratio` (undefined in 1 to 2% of the videos and therefore dropped by the models) | 16 used of 24 |
-| `*_first2s/`, `*_early_half/`, `*_late_half/` | the same | the same statistics from the first 2 s, the first half or the second half of the video | |
+| `*_pre<A>to<B>s/` | the same | the same statistics from B to A seconds before the response (2-s windows; only the videos that cover the window) | |
 | `static/` | | the 23 per-frame quantities of the single image of each trial without exploration | 23 |
 
 Up to 150 frames per trial, evenly spaced, enter the summaries; the motion

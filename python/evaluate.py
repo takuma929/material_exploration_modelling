@@ -27,7 +27,7 @@ then standardized over the training videos; sklearn):
   by modality   LOPO AUC and within-trial AUC per exploration block
 
 Usage: python evaluate.py <feature_set> [--C 0.1]
-  feature_set: object_relational_flow[_first2s|_early_half|_late_half]   the main model: 116 statistics
+  feature_set: object_relational_flow                    the main model: 116 statistics
                object_relational[...]                                   the 100 image statistics without motion
                image_stats_object[...] | relational[...] | flow[...]    one family alone
   (a suffix selects the per-trial summaries of a time window, results/features/<family>_<window>/)
@@ -68,7 +68,8 @@ def load_features(name):
         A = load_features("image_stats_object" + suffix); B = load_features("relational" + suffix)
         return A.merge(B, on=["participant", "trial"])
     if name.startswith(("image_stats", "relational", "flow")):
-        parts = [pd.read_csv(f, dtype={"participant": str}) for f in sorted((FEATURES / name).glob("participant_*.csv"))]
+        parts = [pd.read_csv(f, dtype={"participant": str}) for f in sorted((FEATURES / name).glob("participant_*.csv"))
+                 if f.stat().st_size > 1]                       # an observer with no video in a time window has an empty file
         F = pd.concat(parts, ignore_index=True)
         cols = [c for c in F.columns if c not in ("participant", "trial", "n_frames_used", "n_frames_total")]
         return F[["participant", "trial"] + cols]

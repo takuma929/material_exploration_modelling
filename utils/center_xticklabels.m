@@ -10,7 +10,7 @@ yl = ylim(ax); u = ax.Units; ax.Units = 'centimeters'; h_cm = ax.Position(4); ax
 y = yl(1) - y_cm / h_cm * (yl(2) - yl(1));
 for k = 1:numel(xt)
     l = labels{k};
-    if ischar(l) || isstring(l), l = strsplit(char(l), '\newline'); end
+    if ischar(l) || isstring(l), l = regexp(char(l), '\\newline', 'split'); end   % (strsplit would read '\n' as a line feed)
     text(ax, xt(k), y, l, 'FontName', figstyle.FONT, 'FontSize', figstyle.FS_TICK, ...
         'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Clipping', 'off');
 end

@@ -10,19 +10,19 @@ PY=${PY:-python}
 STAGE=${1:-all}
 
 if [ "$STAGE" = "all" ]; then
-  # 1. the trial table and the per-trial statistics, one time window at a time
+  # 1. the trial table and the per-trial statistics
   $PY build_trial_table.py
-  for w in all first2s early_half late_half; do $PY extract_image_stats.py --crop object --window $w; done
-  $PY extract_relational_stats.py          # every frame, then every window
-  $PY extract_flow_cues.py                 # every frame pair, then every window
+  $PY extract_image_stats.py --crop object
+  $PY extract_relational_stats.py          # every frame, then the summaries over the trial
+  $PY extract_flow_cues.py                 # every frame pair, then the summaries over the trial
+  $PY extract_time_windows.py              # a 2-s window slid back from the response in steps of 1 s
   # 2. the example frames of the figures (the pair and the trial examples need the model scores: see below)
   $PY save_example_frames.py stimuli timecourse stats
 fi
 
-# 3. the models: the main model and its time windows, the 100 statistics without motion, each family alone
+# 3. the models: the main model, the 100 statistics without motion, each family alone
 $PY behaviour_analysis.py
-for fs in object_relational_flow object_relational_flow_first2s object_relational_flow_early_half object_relational_flow_late_half \
-          object_relational image_stats_object relational flow; do
+for fs in object_relational_flow object_relational image_stats_object relational flow; do
   $PY evaluate.py $fs
 done
 $PY regularization_grid.py
@@ -33,6 +33,7 @@ $PY within_trial_breakdown.py
 $PY within_trial_by_similarity.py
 $PY within_trial_by_difference.py
 $PY within_trial_features.py
+$PY sliding_window.py                      # the disagreement test on a 2-s window slid back from the response
 $PY single_statistics.py
 $PY observer_within_trial.py
 $PY collect_results.py

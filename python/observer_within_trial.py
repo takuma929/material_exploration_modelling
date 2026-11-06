@@ -25,16 +25,13 @@ M = RESULTS / "models"
 MODELS = {"stats": (f"{MAIN_FEATURES}_C0.1_scores.csv", "score_wt"),
           "stats_swapped": (f"{MAIN_FEATURES}_C0.1_scores.csv", "score_wt_swapped"),
           "stats_plus_others": (f"{MAIN_FEATURES}_C0.1_scores.csv", "score_plus"),
-          "first2s": (f"{MAIN_FEATURES}_first2s_C0.1_scores.csv", "score_wt"),       # the statistics from part of the trial
-          "early_half": (f"{MAIN_FEATURES}_early_half_C0.1_scores.csv", "score_wt"),
-          "late_half": (f"{MAIN_FEATURES}_late_half_C0.1_scores.csv", "score_wt"),
           "stats_noflow": ("object_relational_C0.1_scores.csv", "score_wt"),          # the 100 image statistics without the motion statistics
           "object_only": ("image_stats_object_C0.1_scores.csv", "score_wt"),          # one family alone
           "relational_only": ("relational_C0.1_scores.csv", "score_wt"),
           "flow_only": ("flow_C0.1_scores.csv", "score_wt")}
 # paired comparisons between models (a minus b)
 CONTRASTS = [("stats", "stats_swapped"), ("stats", "stats_noflow"), ("stats", "object_only"), ("stats", "relational_only"),
-             ("stats", "flow_only"), ("late_half", "first2s"), ("late_half", "early_half"), ("stats", "late_half")]
+             ("stats", "flow_only")]
 
 
 def per_observer_within_trial(S, col):

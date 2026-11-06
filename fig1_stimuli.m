@@ -1,12 +1,13 @@
 % fig1_stimuli
 % Figure 1: what the observers saw, and what the models were given.
 %
-% (a) the first-person view of one observer in each of the four illumination
-%     environments (720 x 720 px screenshots), with the patch given to the
-%     models outlined; (b) those patches: the object plus a margin of its
-%     surround, for the two shapes at the two ends of the metallic parameter;
-% (c) those patches for every environment, unnatural on the left and natural
-%     on the right.
+% (a) the patch given to the models (the object plus a margin of its surround)
+%     at the five levels of physical metallicity, for the two shapes, Sky;
+% (b) the first-person view of one observer in each of the four illumination
+%     environments (720 x 720 px screenshots), with that patch outlined;
+% (c) the patches for the two shapes at the two ends of physical metallicity
+%     in every environment, unnatural on the left and natural on the right.
+% The panels follow the order in which the text introduces them.
 % Output: figs/fig1.{png,pdf}
 
 clearvars; close all;
@@ -21,8 +22,8 @@ fig = figstyle.figure(2, H);
 img_cm = @(l, t, w, h) axes('Parent', fig, 'Units', 'normalized', 'Position', [l / W, (H - t - h) / H, w / W, h / H]);
 lab = @(ax, x, y, s, varargin) text(ax, x, y, s, 'FontName', figstyle.FONT, 'FontSize', figstyle.FS_LEGEND, varargin{:});
 
-%% (a) full first-person views, one per environment (bumpy, metallic 1)
-vw = 4.0; gap = 0.35; left0 = 0.6; top0 = 0.5;
+%% (b) full first-person views, one per environment (bumpy, physical metallicity 1)
+vw = 4.0; gap = 0.35; left0 = 0.6; top0 = 3.55;
 for ie = 1:4
     ax = img_cm(left0 + (ie - 1) * (vw + gap), top0, vw, vw);
     image(ax, imread(fullfile(ex_dir, sprintf('view_%s_Bumpy_m1.png', col.envs{ie})))); axis(ax, 'image', 'off');
@@ -31,8 +32,8 @@ for ie = 1:4
     lab(ax, 360, -12, col.envs{ie}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', figstyle.FS_LABEL);
 end
 
-%% (b) the metallic parameter: one row of patches, both shapes, Sky
-lv = [0 0.25 0.5 0.75 1]; lw_ = 1.55; lg_ = 0.08; top_l = 5.7; left_l = 0.6;
+%% (a) physical metallicity: one row of patches, both shapes, Sky
+lv = [0 0.25 0.5 0.75 1]; lw_ = 1.55; lg_ = 0.08; top_l = 1.0; left_l = 0.6;
 for ig = 1:2
     for il = 1:5
         c = (ig - 1) * 5 + il;
@@ -76,6 +77,6 @@ end
 ov = figstyle.overlay(fig);
 pl = @(x, y, s) text(ov, x / W, 1 - y / H, s, 'Units', 'normalized', 'FontName', figstyle.FONT, ...
     'FontSize', figstyle.FS_PANEL, 'FontWeight', 'bold', 'VerticalAlignment', 'bottom');
-pl(0.1, 0.35, '(a)'); pl(0.1, top_l - 0.5, '(b)'); pl(0.1, top_b - 0.75, '(c)');
+pl(0.1, top_l - 0.5, '(a)'); pl(0.1, top0 - 0.15, '(b)'); pl(0.1, top_b - 0.75, '(c)');
 figstyle.save(fig, fullfile(project_root, 'figs', 'fig1'));
 close(fig);

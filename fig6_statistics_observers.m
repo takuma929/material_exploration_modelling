@@ -109,10 +109,13 @@ figstyle.save(fig, fullfile(project_root, 'figs', 'fig6'));
 close(fig);
 
 function nm = local_lines(s)
-% label lines: 'name, summary' -> {'name', 'summary'}; the object-versus-surround names break after 'obj./surr.'
+% label lines: 'name, summary' -> {'name', '(summary)'}; the object-versus-surround names break after 'obj./surr.'
 parts = strsplit(s, ', ');
+if numel(parts) > 1, parts{end} = ['(' parts{end} ')']; end      % the summary over the trial in parentheses
 if startsWith(parts{1}, 'obj./surr. ')
     nm = [{'obj./surr.', parts{1}(12:end)}, parts(2:end)];
+elseif strcmp(parts{1}, 'maximum luminance')                    % a long name: two lines
+    nm = [{'maximum', 'luminance'}, parts(2:end)];
 else
     nm = parts;
 end

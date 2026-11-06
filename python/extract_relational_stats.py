@@ -1,6 +1,6 @@
 """Relational statistics: the object against its surround, per frame, for
-every frame of every trial, then summarized over the same frame samples and
-time windows as the object statistics.
+every frame of every trial, then summarized over the same frame samples as
+the object statistics.
 
 Per frame (common.context_crop patch, object mask = the rendered alpha):
   bg_Y_mean, bg_Y_sd, bg_Y_max, bg_rms_contrast, bg_chroma_mean   the surround
@@ -14,15 +14,15 @@ do not.
 
 Usage: python extract_relational_stats.py [participant ...]
   Without arguments, every participant whose per-frame file does not exist yet is
-  processed, then the per-trial summaries of every window are (re)written.
+  processed, then the per-trial summaries are (re)written.
 Writes results/features/relational_frames/participant_XXX.csv  (one row per frame)
-       results/features/relational[_first2s|_early_half|_late_half]/participant_XXX.csv
+       results/features/relational/participant_XXX.csv
 """
 import sys
 from multiprocessing import Pool
 import numpy as np
 import pandas as pd
-from common import FEATURES, participants, trial_dirs, frame_paths, context_crop
+from common import FEATURES, participants, trial_dirs, frame_paths, context_crop, window_mask
 
 MAX_FRAMES = 150
 FRAMES = FEATURES / "relational_frames"
@@ -74,13 +74,7 @@ def frames_of_participant(pid):
 
 def select(D, window):
     """Same frame selection as extract_image_stats: window, then at most MAX_FRAMES evenly spaced."""
-    t = D.t_ms.values
-    if window == "first2s":
-        D = D[t - t[0] <= 2000]
-    elif window == "late_half":
-        D = D.iloc[len(D) // 2:]
-    elif window == "early_half":
-        D = D.iloc[: max(5, len(D) // 2)]
+    D = D[window_mask(D.t_ms.values, window)]
     if len(D) > MAX_FRAMES:
         D = D.iloc[np.linspace(0, len(D) - 1, MAX_FRAMES).round().astype(int)]
     return D
@@ -123,6 +117,5 @@ if __name__ == "__main__":
     with Pool(8) as pool:
         pool.map(frames_of_participant, todo)
     for pid in pids:
-        for window in ("all", "first2s", "late_half", "early_half"):
-            summarize(pid, window)
+        summarize(pid, "all")                                   # the windows before the response: extract_time_windows.py
     print("summaries written", flush=True)

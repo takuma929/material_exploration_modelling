@@ -4,7 +4,7 @@ Reads the tables written by the other scripts (nothing is computed from the
 frames here) and writes one JSON file whose keys are the placeholders of the
 manuscript.  The main groups of keys:
 
-  stats_*, first2s_*, early_*, late_*   the main model and its time-window variants
+  stats_*                               the main model
                                         (leave-one-observer-out AUC, by condition; the
                                         disagreement test and its permutation null)
   or_*, ostats_*, rel_*, flow_*         the 100 image statistics without motion, and each
@@ -21,6 +21,7 @@ manuscript.  The main groups of keys:
   st_*, stfm_*, mvfs_*, pm_*, dur_*     the condition without exploration and the behaviour
                                         of the four conditions
   ill_*, pair_*                         the example videos of Figures 2 and 7
+  slide, slide_tests                    the disagreement test on a 2-s window slid back from the response
   n_frames_*, dur_*, n_pairs, ...       counts and durations from the trial table
 
 Run after every other analysis script (see run_pipeline.sh).
@@ -47,8 +48,7 @@ def row(fs, C):
 
 
 # ---------------------------------------------------------------- the models (evaluate.py)
-for key, fs, C in [("stats", MAIN_FEATURES, 0.1), ("first2s", MAIN_FEATURES + "_first2s", 0.1), ("early", MAIN_FEATURES + "_early_half", 0.1),
-                   ("late", MAIN_FEATURES + "_late_half", 0.1), ("or", "object_relational", 0.1),
+for key, fs, C in [("stats", MAIN_FEATURES, 0.1), ("or", "object_relational", 0.1),
                    ("ostats", "image_stats_object", 0.1), ("rel", "relational", 0.1), ("flow", "flow", 0.1)]:
     if not ((M.feature_set == fs) & np.isclose(M.C, C)).any():
         continue
@@ -156,7 +156,7 @@ if bs_.exists():      # within_trial_by_similarity.py: by the distance between t
             n[f"wts_q{r.quartile}_{c}"] = float(getattr(r, c))
     n["wts_n_components"] = int(Bs.n_components.iloc[0]); n["wts_var_explained"] = float(Bs.var_explained.iloc[0])
 bb_ = RESULTS / "models" / "within_trial_breakdown.csv"
-if bb_.exists():      # within_trial_breakdown.py: all pairs, by environment and by shape (Figure 7b, d)
+if bb_.exists():      # within_trial_breakdown.py: all pairs, by environment and by shape (Figure 7b)
     Bb = pd.read_csv(bb_)
     for r in Bb.itertuples():
         for c in ("n_pairs", "within_trial_auc", "null_mean", "null_sd", "z", "p", "obs_mean", "obs_se", "n_obs_above"):
@@ -218,6 +218,12 @@ if sg.exists():
     n["sg_bm_n_above_model"] = int((So[feats].max(axis=1) > Oa_.auc_own.loc[So.index]).sum())
     n["sg_n_dir16_min"] = int(n_dir16.min()); n["sg_n_dir16_median"] = float(n_dir16.median())
     n["sg_top_n_same_min"] = int(top.n_same_direction.min())
+    # the best single statistic of each observer in either direction against the model that combines all statistics,
+    # and how many statistics come within 0.05 of the best one
+    either = np.maximum(So[feats], 1 - So[feats])
+    n["sg_n_model_above_best"] = int((Oa_.auc_own.loc[So.index] > either.max(axis=1)).sum())
+    near = (either.ge(either.max(axis=1) - 0.05, axis=0)).sum(axis=1)
+    n["sg_n_near_best_median"] = float(near.median()); n["sg_n_near_best_min"] = int(near.min()); n["sg_n_near_best_max"] = int(near.max())
 
 # ---------------------------------------------------------------- the condition without exploration (static_block.py; Figures 3 and 4b)
 sb = RESULTS / "models" / "static_block.csv"
@@ -259,6 +265,38 @@ if pf.exists():
         n[f"pair_{r.role}_dur"] = float(T[(T.participant == r.participant) & (T.folder == r.folder)].iloc[0].t_last_ms / 1000)
     parts = P.folder.iloc[0].split("_")
     n["pair_trial"] = int(parts[0]); n["pair_env"] = parts[1]; n["pair_geom"] = parts[2].lower(); n["pair_metal"] = parts[3]; n["pair_metal_num"] = float(parts[3])
+
+# ---------------------------------------------------------------- a 2-s window slid back from the response (sliding_window.py)
+# slide[window]: the disagreement test on the statistics of one window (pre0to2s = the last 2 s, pre2to4s = from 4 to 2 s
+# before the response, ...), with the videos that cover it; pct_videos: their share of all videos;
+# slide_tests: the peak window (from 3 to 1 s before the response) against its neighbors, paired across observers:
+# against the window before it, against the last window, and against the last window on the videos of the peak window only
+sf = RESULTS / "models" / "sliding_window.csv"
+if sf.exists():
+    Sw = pd.read_csv(sf)
+    n["slide"] = {r.window: dict(wt=float(r.within_trial_auc), null_mean=float(r.null_mean), null_sd=float(r.null_sd), z=float(r.z), p=float(r.p),
+                                 n_videos=int(r.n_videos), pct_videos=float(100 * r.n_videos / len(T)), n_pairs=int(r.n_pairs),
+                                 obs_mean=float(r.obs_mean), obs_se=float(r.obs_se), n_obs=int(r.n_obs)) for r in Sw[Sw.min_duration_s == 0].itertuples()}
+    Wo = pd.read_csv(RESULTS / "models" / "sliding_window_by_observer.csv", dtype={"participant": str}).set_index("participant")
+    n["slide_tests"] = {}
+    for key, a, b in [("peak_vs_before", "pre1to3s", "pre2to4s"), ("peak_vs_last", "pre1to3s", "pre0to2s"), ("peak_vs_last_matched", "pre1to3s", "pre0to2s_min3")]:
+        t = ttest_rel(Wo[a], Wo[b])
+        n["slide_tests"][key] = dict(mean_a=float(Wo[a].mean()), mean_b=float(Wo[b].mean()), t=float(t.statistic), df=int(len(Wo) - 1), p=float(t.pvalue))
+
+# ---------------------------------------------------------------- effect sizes
+# Cohen's d of every paired or one-sample t-test: the mean difference over the standard deviation of the
+# differences, d = t / sqrt(N) with N = df + 1 observers; Kendall's W of the Friedman tests, W = chi2 / (N (k - 1))
+def add_d(x):
+    if isinstance(x, dict):
+        if "t" in x and "df" in x and x["t"] == x["t"]:
+            x["d"] = float(x["t"] / np.sqrt(x["df"] + 1))
+        for v in x.values():
+            add_d(v)
+add_d(n)
+N_OBS = T.participant.nunique()
+n["block_resp_friedman_W"] = n["block_resp_friedman_chi2"] / (N_OBS * 2)
+n["block_dur_friedman_W"] = n["block_dur_friedman_chi2"] / (N_OBS * 2)
+n["cond_tests"]["friedman4_stats"]["W"] = n["cond_tests"]["friedman4_stats"]["chi2"] / (N_OBS * 3)
 
 json.dump(n, open(RESULTS / "numbers.json", "w"), indent=1)
 for k, v in n.items():

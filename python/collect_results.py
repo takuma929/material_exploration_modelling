@@ -24,10 +24,7 @@ T["all_obs"] = T.groupby("trial").resp.transform("mean")                        
 
 # predictor name -> (column holding the prediction, scores file in results/models/ or None for a column of trials.csv)
 PRED = {"metal_parameter": ("metal", None), "other_observers": ("others", None), "all_observers": ("all_obs", None),
-        "image_stats": ("score", f"{MAIN_FEATURES}_C0.1_scores.csv"),                       # the main model (116 statistics, whole trial)
-        "image_stats_first2s": ("score", f"{MAIN_FEATURES}_first2s_C0.1_scores.csv"),       # the same statistics from part of the trial
-        "image_stats_early_half": ("score", f"{MAIN_FEATURES}_early_half_C0.1_scores.csv"),
-        "image_stats_late_half": ("score", f"{MAIN_FEATURES}_late_half_C0.1_scores.csv"),
+        "image_stats": ("score", f"{MAIN_FEATURES}_C0.1_scores.csv"),                       # the main model (116 statistics)
         "object_relational": ("score", "object_relational_C0.1_scores.csv"),                # the 100 image statistics without the motion statistics
         "image_stats_object": ("score", "image_stats_object_C0.1_scores.csv"),              # one family alone
         "relational": ("score", "relational_C0.1_scores.csv"),

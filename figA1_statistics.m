@@ -166,14 +166,12 @@ lim = [min(v) max(v)] + [-0.02 0.02]; xlim(ax, lim); ylim(ax, lim);
 figstyle.set_ticks(ax, 'x', 0.2:0.2:0.8, '%.1f'); figstyle.set_ticks(ax, 'y', 0.2:0.2:0.8, '%.1f');
 
 %% 11 time windows
-k = 11; hd(k, 'Time windows', {'*_first2s, *_early_half, *_late_half'}, {'the same statistics from the first 2 s,', 'the first half or the second half only'});
+k = 11; hd(k, 'Time windows', {'*_pre<A>to<B>s'}, {'the same statistics from a 2-s window', 'before the response (here the final 2 s)'});
 [l, tp, w, h] = plot_box(k); ax = ax_cm(l, tp, w, h);
 yl = [min(v) - 0.05, max(v) + 0.12];
-fill(ax, [0 2 2 0], yl([1 1 2 2]), light, 'EdgeColor', 'none', 'FaceAlpha', 0.5);
-fill(ax, [t(hh + 1) t(end) t(end) t(hh + 1)], yl([1 1 2 2]), col.ramp(3, :), 'EdgeColor', 'none', 'FaceAlpha', 0.35);
+fill(ax, [t(end) - 2, t(end), t(end), t(end) - 2], yl([1 1 2 2]), light, 'EdgeColor', 'none', 'FaceAlpha', 0.5);   % the window from 2 to 0 s before the response
 plot(ax, t, v, '-', 'Color', accent, 'LineWidth', figstyle.LW_LINE);
-text(ax, 0.05, yl(2), 'first 2 s', small{:}, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
-text(ax, t(end), yl(2), 'second half ', small{:}, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+text(ax, t(end) - 1.95, yl(2), 'final 2 s', small{:}, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
 xlim(ax, [0 t(end)]); ylim(ax, yl); figstyle.set_label(ax, 'x', 'Time [s]'); figstyle.set_label(ax, 'y', 'RMS contrast');
 figstyle.set_ticks(ax, 'x', 0:1:2, '%.0f');
 

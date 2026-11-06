@@ -9,7 +9,7 @@ contrast, highlight coverage, edge energy, Lab chroma, object-vs-surround
 luminance and contrast (context mode), frame-difference energy.  Per trial: mean, sd, max,
 first-vs-last-half change of each time series and lag-1 autocorrelations.
 
-Usage: python extract_image_stats.py [--window all|first2s|early_half|late_half]
+Usage: python extract_image_stats.py [--window all|pre<A>to<B>s]
                                      [--crop context|object] [--shuffle SEED] [participant ...]
 Writes results/features/image_stats[_object][_<window>][_shuffleSEED]/participant_XXX.csv
 The paper uses --crop object (the object statistics, 63 per trial), once per
@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from scipy.ndimage import binary_erosion
-from common import IMGS, FEATURES, participants, trial_dirs, frame_paths, context_crop
+from common import IMGS, FEATURES, participants, trial_dirs, frame_paths, context_crop, window_mask
 
 MAX_FRAMES = 150
 CONTOUR_PX = 2          # band inside the silhouette excluded in object mode
@@ -42,15 +42,10 @@ OUT = out_dir()
 OUT.mkdir(parents=True, exist_ok=True)
 
 
-def select_window(frames):
-    t = np.array([float(p.stem) for p in frames])
-    if WINDOW == "first2s":
-        return [f for f, tt in zip(frames, t) if tt - t[0] <= 2000]
-    if WINDOW == "early_half":
-        return frames[: max(5, len(frames) // 2)]
-    if WINDOW == "late_half":
-        return frames[len(frames) // 2:]
-    return frames
+def select_window(frames, window=None):
+    """The frames of a time window (common.window_mask)."""
+    keep = window_mask([float(p.stem) for p in frames], WINDOW if window is None else window)
+    return [f for f, k in zip(frames, keep) if k]
 
 
 def srgb_to_lin(x):
